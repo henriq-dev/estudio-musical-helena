@@ -1,0 +1,15 @@
+Estúdio Musical da Helena Sophia - app instalável
+
+Arquivos (mantenha todos juntos, na mesma pasta):
+  index.html, manifest.webmanifest, sw.js, pasta icons/
+
+Para virar aplicativo, a pasta precisa estar publicada em um endereço https://
+(ex.: GitHub Pages, Netlify, Cloudflare Pages - todos têm opção gratuita).
+Abrindo o index.html direto do computador, o jogo funciona normalmente, mas sem o botão de instalar.
+
+Depois de publicado:
+  - Android/Chrome e computador: toque em "Instalar o app" na tela inicial (ou menu > Instalar app).
+  - iPhone/iPad (Safari): Compartilhar > Adicionar à Tela de Início.
+O app abre em tela cheia e funciona sem internet depois da primeira visita.
+
+Ao mudar o app no futuro, troque "estudio-helena-v1" por "v2" dentro de sw.js para os aparelhos pegarem a versão nova.
