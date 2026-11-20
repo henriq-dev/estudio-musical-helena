@@ -181,6 +181,107 @@ button:focus-visible {
   .install-hint { font-size: 0.8rem; }
 }
 
+/* ---------- controle dos pais e gravação ---------- */
+.panel-music { position: relative; }
+.gear {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.4rem;
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 9999px;
+  background: transparent;
+  font-size: 1.2rem;
+  line-height: 1;
+  opacity: 0.35;
+  touch-action: none;
+  -webkit-touch-callout: none;
+}
+.gear.holding { opacity: 1; animation: gear-spin 3s linear forwards; }
+@keyframes gear-spin { to { transform: rotate(360deg); } }
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: oklch(0.3 0.12 310 / 0.55);
+}
+.sheet {
+  display: flex;
+  width: min(100%, 28rem);
+  max-height: 92dvh;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow-y: auto;
+  padding: 1rem 1.25rem;
+  border: 5px solid var(--card);
+  border-radius: 1.75rem;
+  background: var(--gradient-studio);
+  box-shadow: var(--shadow-toy), var(--shadow-glow);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.sheet-title { margin: 0; text-align: center; font-size: 1.3rem; line-height: 1.3; font-weight: 700; }
+.sheet-info { margin: 0; text-align: center; font-size: 0.95rem; color: var(--muted-foreground); }
+.sheet .row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.4rem 0.75rem; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.5rem; }
+.chip {
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  background: var(--card);
+  color: var(--foreground);
+  font-size: 1rem;
+  line-height: 1.3;
+  font-weight: 700;
+}
+.chip[aria-pressed="true"], .chip.on { background: var(--secondary); color: var(--primary-foreground); }
+.chip.primary { background: var(--primary); color: var(--primary-foreground); }
+.sheet input[type="text"] {
+  padding: 0.5rem 0.9rem;
+  border: 3px solid var(--border);
+  border-radius: 1rem;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 1.1rem;
+  text-align: center;
+}
+.sheet input[type="range"] { flex: 1 1 8rem; accent-color: var(--primary); }
+.mine { display: flex; flex-direction: column; gap: 0.35rem; }
+.mine .mine-row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.25rem 0.5rem 0.25rem 0.75rem; border-radius: 1rem; background: color-mix(in oklch, var(--card) 80%, transparent); font-weight: 700; }
+.mine .chip { padding: 0.15rem 0.6rem; }
+.emoji-opt { width: 2.8rem; height: 2.8rem; padding: 0; border-radius: 9999px; background: var(--card); font-size: 1.5rem; line-height: 1; }
+.emoji-opt[aria-pressed="true"] { background: var(--accent); box-shadow: 0 0 0 3px var(--primary); }
+.rec-bar {
+  position: fixed;
+  top: max(0.5rem, env(safe-area-inset-top));
+  left: 50%;
+  z-index: 65;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.8rem;
+  border: 3px solid var(--card);
+  border-radius: 9999px;
+  background: var(--destructive);
+  color: var(--primary-foreground);
+  font-weight: 700;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+.rec-bar .toy { padding: 0.1rem 0.6rem; border-radius: 9999px; background: var(--card); font-size: 1.2rem; line-height: 1.4; }
+.song-list { max-height: 13rem; overflow-y: auto; }
+@media (max-height: 520px) {
+  .song-list { max-height: none; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 5.2rem; overflow-x: auto; overflow-y: hidden; }
+  .gear { top: 50%; margin-top: -1.2rem; }
+}
+@media (min-width: 640px) and (min-height: 521px) {
+  .song-list { max-height: none; }
+}
+
 /* ---------- estúdio ---------- */
 .app {
   position: relative;
@@ -670,7 +771,7 @@ h1 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .guide, .guide.help { animation: none; }
+  .guide, .guide.help, .gear.holding { animation: none; }
   .conf { display: none; }
   .party-card { animation: none; }
   .start-btn { animation: none; }
@@ -725,6 +826,7 @@ h1 {
       <section class="panel panel-music">
         <p class="panel-title">Música de fundo</p>
         <div id="styles" class="styles"></div>
+        <button id="gear" type="button" class="gear" aria-label="Controle dos pais (segure por 3 segundos)">⚙️</button>
       </section>
     </main>
 
@@ -738,6 +840,43 @@ h1 {
         <div class="party-actions">
           <button id="again" type="button" class="toy" aria-label="Tocar de novo">🔁</button>
           <button id="next" type="button" class="toy" aria-label="Outra música">➡️</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rec-bar" class="rec-bar" hidden>
+      <span id="rec-text" aria-live="polite">🔴 Gravando…</span>
+      <button id="rec-done" type="button" class="toy" aria-label="Terminei">✔️</button>
+      <button id="rec-cancel" type="button" class="toy" aria-label="Cancelar">✖️</button>
+    </div>
+
+    <div id="parent" class="modal" hidden>
+      <div class="sheet" role="dialog" aria-label="Controle dos pais">
+        <p class="sheet-title">⚙️ Controle dos pais</p>
+        <div class="row"><span>🗣️ Voz falando</span><button id="opt-voice" type="button" class="toy chip" aria-pressed="true">Ligada</button></div>
+        <div class="row"><span>🔊 Volume</span><input id="opt-vol" type="range" min="10" max="100" step="5" aria-label="Volume" /></div>
+        <div class="row"><span>⏱️ Velocidade do “Ouvir”</span>
+          <span id="opt-speed" class="chips">
+            <button type="button" class="toy chip" data-v="0.7">🐢 Devagar</button>
+            <button type="button" class="toy chip" data-v="1">🚶 Normal</button>
+            <button type="button" class="toy chip" data-v="1.3">🐇 Rápido</button>
+          </span>
+        </div>
+        <div class="row"><span>🎙️ Músicas novas</span><button id="rec-start" type="button" class="toy chip">Gravar uma música</button></div>
+        <div id="mine" class="mine"></div>
+        <button id="parent-close" type="button" class="toy chip primary">Fechar</button>
+      </div>
+    </div>
+
+    <div id="savesong" class="modal" hidden>
+      <div class="sheet" role="dialog" aria-label="Salvar música">
+        <p class="sheet-title">🎼 Nova musiquinha</p>
+        <p id="save-info" class="sheet-info"></p>
+        <input id="song-name" type="text" maxlength="18" autocomplete="off" aria-label="Nome da música" />
+        <div id="emoji-pick" class="chips"></div>
+        <div class="chips">
+          <button id="save-ok" type="button" class="toy chip primary">💾 Salvar</button>
+          <button id="save-no" type="button" class="toy chip">Descartar</button>
         </div>
       </div>
     </div>
@@ -772,7 +911,7 @@ h1 {
       const comp = ctx.createDynamicsCompressor();
       comp.connect(ctx.destination);
       master = ctx.createGain();
-      master.gain.value = 0.8;
+      master.gain.value = settings.volume / 100;
       master.connect(comp);
       backingMaster = ctx.createGain();
       backingMaster.gain.value = 0.45;
@@ -1243,6 +1382,7 @@ h1 {
   const playMidi = (midi, elem) => {
     playNote(state.inst, midi);
     hit(elem);
+    recordNote(midi);
     songPress(midi);
   };
   const playPad = (id, elem) => {
@@ -1450,6 +1590,51 @@ h1 {
     );
   });
 
+  /* ---------- Configurações dos pais (ficam guardadas no aparelho) ---------- */
+  const CFG_KEY = "helena-config";
+  const settings = Object.assign({ voice: true, volume: 80, speed: 1 }, (() => {
+    try {
+      return JSON.parse(localStorage.getItem(CFG_KEY) || "{}") || {};
+    } catch (e) {
+      return {};
+    }
+  })());
+  const saveSettings = () => {
+    try {
+      localStorage.setItem(CFG_KEY, JSON.stringify(settings));
+    } catch (e) {
+      /* sem armazenamento: tudo bem */
+    }
+  };
+
+  /* ---------- Músicas gravadas pelos pais ---------- */
+  const CUSTOM_KEY = "helena-musicas-novas";
+  const loadCustom = () => {
+    try {
+      return JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]") || [];
+    } catch (e) {
+      return [];
+    }
+  };
+  const hydrate = (c) => ({
+    id: c.id, emoji: c.emoji, name: c.name, bpm: c.bpm, custom: true, raw: c,
+    parts: c.parts.map((part) => part.map(([idx, beats]) => ({ idx, midi: NOTES[idx].midi, beats }))),
+  });
+  loadCustom().forEach((c) => {
+    try {
+      SONGS.push(hydrate(c));
+    } catch (e) {
+      /* música estragada: ignora */
+    }
+  });
+  const saveCustom = () => {
+    try {
+      localStorage.setItem(CUSTOM_KEY, JSON.stringify(SONGS.filter((x) => x.custom).map((x) => x.raw)));
+    } catch (e) {
+      /* sem armazenamento: tudo bem */
+    }
+  };
+
   const STORE_KEY = "helena-musiquinhas";
   const loadDone = () => {
     try {
@@ -1500,7 +1685,7 @@ h1 {
   // Fala em voz alta (para quem ainda não lê bem). Se o aparelho não tiver voz, não faz nada.
   function say(text) {
     try {
-      if (!("speechSynthesis" in window)) return;
+      if (!settings.voice || !("speechSynthesis" in window)) return;
       speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "pt-BR";
@@ -1571,7 +1756,7 @@ h1 {
   }
 
   function renderSongs() {
-    songListEl.replaceChildren();
+    songListEl.replaceChildren(listenBtn); // o botão de ouvir é sempre o primeiro
     SONGS.forEach((sg) => {
       const b = make("button", "toy song-btn", { type: "button", "aria-pressed": String(sg.id === mode.id) });
       b.innerHTML =
@@ -1579,7 +1764,6 @@ h1 {
       b.addEventListener("click", () => pickSong(sg.id));
       songListEl.append(b);
     });
-    songListEl.append(listenBtn); // o botão de ouvir é a sexta "figurinha" da grade
     listenBtn.hidden = false;
   }
 
@@ -1681,7 +1865,7 @@ h1 {
     hush();
     const sg = curSong();
     const seq = curSeq();
-    const beatMs = 60000 / sg.bpm;
+    const beatMs = 60000 / (sg.bpm * settings.speed);
     mode.listening = true;
     mode.pos = 0;
     updateListenBtn();
@@ -1795,6 +1979,229 @@ h1 {
       stopListen();
       hush();
     }
+  });
+
+  /* =====================================================================
+   * 5. CONTROLE DOS PAIS E GRAVAÇÃO DE MÚSICAS
+   * A engrenagem só abre depois de segurar por 3 segundos.
+   * ===================================================================== */
+  const gear = $("gear");
+  const parentEl = $("parent");
+  const saveEl = $("savesong");
+  const recBar = $("rec-bar");
+  const recText = $("rec-text");
+  const rec = { on: false, notes: [], pending: null, emoji: "🌈" };
+  const EMOJIS = ["🌈", "🦄", "🐶", "🐱", "🌟", "🎈", "🍓", "🚀"];
+
+  function applyVolume() {
+    if (master) master.gain.value = settings.volume / 100;
+  }
+
+  function renderParent() {
+    const v = $("opt-voice");
+    v.setAttribute("aria-pressed", String(settings.voice));
+    v.textContent = settings.voice ? "Ligada" : "Desligada";
+    $("opt-vol").value = String(settings.volume);
+    $("opt-speed").querySelectorAll("button").forEach((b) => {
+      b.classList.toggle("on", Number(b.dataset.v) === settings.speed);
+    });
+    const mine = $("mine");
+    mine.replaceChildren();
+    SONGS.filter((x) => x.custom).forEach((sg) => {
+      const row = make("div", "mine-row");
+      const label = make("span");
+      label.textContent = sg.emoji + " " + sg.name;
+      const del = make("button", "toy chip", { type: "button", "aria-label": "Apagar " + sg.name });
+      del.textContent = "🗑";
+      del.addEventListener("click", () => {
+        if (!window.confirm("Apagar a música “" + sg.name + "”?")) return;
+        SONGS.splice(SONGS.indexOf(sg), 1);
+        saveCustom();
+        delete mode.done[sg.id];
+        saveDone();
+        if (mode.id === sg.id) {
+          stopListen();
+          closeParty();
+          mode.id = SONGS[0].id;
+          mode.part = 0;
+          mode.pos = 0;
+        }
+        if (mode.on) {
+          renderSongs();
+          decorate();
+        }
+        renderParent();
+      });
+      row.append(label, del);
+      mine.append(row);
+    });
+  }
+
+  const openParent = () => {
+    stopListen();
+    renderParent();
+    parentEl.hidden = false;
+  };
+  const closeParentSheet = () => {
+    parentEl.hidden = true;
+  };
+
+  // Segurar a engrenagem por 3 segundos (a engrenagem gira enquanto segura).
+  let gearTimer = null;
+  const gearCancel = () => {
+    clearTimeout(gearTimer);
+    gear.classList.remove("holding");
+  };
+  gear.addEventListener("pointerdown", () => {
+    gearCancel();
+    void gear.offsetWidth;
+    gear.classList.add("holding");
+    gearTimer = setTimeout(() => {
+      gearCancel();
+      openParent();
+    }, 3000);
+  });
+  ["pointerup", "pointerleave", "pointercancel"].forEach((t) => gear.addEventListener(t, gearCancel));
+  gear.addEventListener("contextmenu", (e) => e.preventDefault());
+  gear.addEventListener("click", (e) => {
+    if (e.detail === 0) openParent(); // quem usa o teclado (adulto) abre direto
+  });
+
+  $("parent-close").addEventListener("click", closeParentSheet);
+  $("opt-voice").addEventListener("click", () => {
+    settings.voice = !settings.voice;
+    if (!settings.voice) hush();
+    saveSettings();
+    renderParent();
+  });
+  $("opt-vol").addEventListener("input", (e) => {
+    settings.volume = Number(e.target.value);
+    applyVolume();
+    saveSettings();
+  });
+  $("opt-vol").addEventListener("change", () => {
+    getCtx();
+    playNote("piano", 72);
+  });
+  $("opt-speed").addEventListener("click", (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    settings.speed = Number(b.dataset.v);
+    saveSettings();
+    renderParent();
+  });
+
+  /* ---------- Gravar ---------- */
+  function recordNote(midi) {
+    if (!rec.on) return;
+    const idx = NOTES.findIndex((n) => n.midi === midi);
+    if (idx < 0) return; // teclas pretas e bateria não entram
+    rec.notes.push({ idx, t: performance.now() });
+    recText.textContent = "🔴 Gravando · " + rec.notes.length + (rec.notes.length === 1 ? " nota" : " notas");
+    if (rec.notes.length >= 60) finishRecording();
+  }
+
+  function startRecording() {
+    closeParentSheet();
+    stopListen();
+    closeParty();
+    setMode(false); // grava no modo livre, sem luzes atrapalhando
+    rec.on = true;
+    rec.notes = [];
+    recText.textContent = "🔴 Gravando… toque a melodia";
+    recBar.hidden = false;
+    getCtx();
+  }
+
+  function cancelRecording() {
+    rec.on = false;
+    rec.notes = [];
+    recBar.hidden = true;
+  }
+
+  function finishRecording() {
+    if (rec.notes.length < 3) {
+      recText.textContent = "🔴 Toque pelo menos 3 notas";
+      return;
+    }
+    rec.on = false;
+    recBar.hidden = true;
+    rec.pending = rec.notes.slice(0, 60);
+    rec.notes = [];
+    rec.emoji = EMOJIS[0];
+    const n = SONGS.filter((x) => x.custom).length + 1;
+    $("song-name").value = "Minha música " + n;
+    $("save-info").textContent = rec.pending.length + " notas gravadas. Dê um nome e escolha uma figurinha:";
+    renderEmojiPick();
+    saveEl.hidden = false;
+  }
+
+  function renderEmojiPick() {
+    const box = $("emoji-pick");
+    box.replaceChildren();
+    EMOJIS.forEach((em) => {
+      const b = make("button", "toy emoji-opt", { type: "button", "aria-pressed": String(em === rec.emoji), "aria-label": em });
+      b.textContent = em;
+      b.addEventListener("click", () => {
+        rec.emoji = em;
+        renderEmojiPick();
+      });
+      box.append(b);
+    });
+  }
+
+  // Transforma o que foi tocado em música: descobre o andamento, os tempos e divide em pedacinhos.
+  function buildSong(raw, name, emoji) {
+    const gaps = [];
+    for (let i = 0; i < raw.length - 1; i++) gaps.push(raw[i + 1].t - raw[i].t);
+    const sorted = gaps.slice().sort((a, b) => a - b);
+    const med = sorted[Math.floor(sorted.length / 2)] || 600;
+    const unit = Math.min(Math.max(med, 350), 900);
+    const notes = raw.map((n, i) => {
+      const gap = i < gaps.length ? gaps[i] : unit * 2;
+      const beats = Math.min(Math.max(Math.round((gap / unit) * 2) / 2, 0.5), 4);
+      return [n.idx, beats];
+    });
+    const parts = [];
+    let cur = [];
+    notes.forEach((n, i) => {
+      cur.push(n);
+      const end = (cur.length >= 8 && n[1] >= 2) || cur.length >= 14;
+      if (end && i < notes.length - 1) {
+        parts.push(cur);
+        cur = [];
+      }
+    });
+    if (cur.length) {
+      if (cur.length < 4 && parts.length) parts[parts.length - 1].push(...cur);
+      else parts.push(cur);
+    }
+    return { id: "u" + Date.now(), emoji, name, bpm: Math.round(60000 / unit), parts };
+  }
+
+  $("rec-start").addEventListener("click", startRecording);
+  $("rec-done").addEventListener("click", finishRecording);
+  $("rec-cancel").addEventListener("click", cancelRecording);
+  $("save-no").addEventListener("click", () => {
+    rec.pending = null;
+    saveEl.hidden = true;
+  });
+  $("save-ok").addEventListener("click", () => {
+    if (!rec.pending) return;
+    const name = $("song-name").value.trim() || "Minha música";
+    const sg = hydrate(buildSong(rec.pending, name, rec.emoji));
+    SONGS.push(sg);
+    saveCustom();
+    rec.pending = null;
+    saveEl.hidden = true;
+    setMode(true);
+    mode.done[sg.id] = false;
+    pickSong(sg.id);
+  });
+  window.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (!parentEl.hidden) closeParentSheet();
+    else if (!saveEl.hidden) $("save-no").click();
   });
 
   // Teclado do computador: A S D F G H J K (bateria: A S D F G H)
