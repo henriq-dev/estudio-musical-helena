@@ -1,6 +1,6 @@
 /* Service worker do Estúdio Musical: faz o app abrir e tocar sem internet.
  * Para publicar uma nova versão do app, troque o número em CACHE (ex.: v2). */
-const CACHE = "estudio-helena-v2";
+const CACHE = "estudio-helena-v3";
 const CORE = [
   "./",
   "./index.html",

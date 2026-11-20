@@ -12,4 +12,4 @@ Depois de publicado:
   - iPhone/iPad (Safari): Compartilhar > Adicionar à Tela de Início.
 O app abre em tela cheia e funciona sem internet depois da primeira visita.
 
-Ao mudar o app no futuro, aumente o número em "estudio-helena-v2" (ex.: v3) dentro de sw.js para os aparelhos pegarem a versão nova.
+Ao mudar o app no futuro, aumente o número em "estudio-helena-v3" (ex.: v4) dentro de sw.js para os aparelhos pegarem a versão nova.

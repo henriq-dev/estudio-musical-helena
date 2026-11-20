@@ -770,6 +770,58 @@ h1 {
   .progress i { width: 1.5rem; height: 1.5rem; font-size: 1.2rem; }
 }
 
+/* ---------- ajustes de responsividade (por último, para valer sobre o resto) ---------- */
+.panel-board { min-height: 13.5rem; }
+.song-btn .nm { min-width: 0; overflow-wrap: anywhere; text-align: center; }
+
+/* celular em pé com pouca altura (iPhone SE, Androids pequenos...) */
+@media (max-height: 760px) and (orientation: portrait) {
+  .app { gap: 0.4rem; padding-top: max(0.4rem, env(safe-area-inset-top)); padding-bottom: max(0.4rem, env(safe-area-inset-bottom)); }
+  h1 { font-size: clamp(1.1rem, 5.2vw, 1.6rem); line-height: 1.15; }
+  .mode-btn { padding: 0.2rem 0.4rem; font-size: 0.95rem; }
+  .song-list { grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr)); gap: 0.35rem; max-height: 7.6rem; padding: 0.3rem 0.3rem 0.4rem; }
+  .song-btn { padding: 0.15rem 0.1rem; border-radius: 1rem; }
+  .song-btn .emoji { font-size: 1.6rem; }
+  .song-btn .nm { display: none; }
+  .listen-btn { min-height: 2.9rem; font-size: 1.8rem; }
+  .current, .hint { display: none; }
+  .panel { padding: 0.4rem; }
+  .panel-board { min-height: 10rem; }
+  .progress { margin-bottom: 0.3rem; gap: 0.2rem; }
+  .progress i { width: 1rem; height: 1rem; font-size: 0.8rem; }
+  .panel-music { display: flex; align-items: center; gap: 0.4rem; }
+  .panel-music .panel-title { display: none; }
+  .panel-music .styles { flex: 1; gap: 0.3rem; }
+  .style-btn { flex-direction: row; justify-content: center; gap: 0.15rem; padding: 0.25rem 0.1rem; font-size: clamp(0.72rem, 3.6vw, 0.85rem); }
+  .style-btn .icon { font-size: 1rem; }
+  .gear { position: static; flex: 0 0 auto; width: 2rem; height: 2rem; }
+}
+
+/* celular deitado */
+@media (max-height: 520px) {
+  .song-list { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(3.2rem, 1fr); max-height: none; overflow-x: auto; overflow-y: hidden; }
+}
+@media (max-height: 520px) and (max-width: 780px) {
+  .song-list { grid-auto-columns: minmax(2.5rem, 1fr); gap: 0.3rem; }
+  .song-btn .nm { display: none; }
+  .song-btn .emoji { font-size: 1.4rem; }
+}
+@media (max-height: 380px) {
+  .app { gap: 0.3rem; padding-top: max(0.3rem, env(safe-area-inset-top)); padding-bottom: max(0.3rem, env(safe-area-inset-bottom)); }
+  .inst { padding: 0.1rem; }
+  .inst .emoji { font-size: 1.25rem; }
+  .inst .label { display: none; }
+  .panel { padding: 0.3rem; }
+  .panel-board { min-height: 6.5rem; }
+  #board { min-height: 5rem; }
+  .hint { display: none; }
+  .style-btn { padding: 0.1rem 0.8rem; font-size: 0.9rem; }
+  .panel-music { gap: 0.6rem; }
+  .gear { position: static; width: 1.8rem; height: 1.8rem; margin: 0; }
+  .progress { margin-bottom: 0.15rem; }
+  .mode-btn { padding: 0.1rem 0.7rem; font-size: 0.85rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .guide, .guide.help, .gear.holding { animation: none; }
   .conf { display: none; }
@@ -1758,9 +1810,17 @@ h1 {
   function renderSongs() {
     songListEl.replaceChildren(listenBtn); // o botão de ouvir é sempre o primeiro
     SONGS.forEach((sg) => {
-      const b = make("button", "toy song-btn", { type: "button", "aria-pressed": String(sg.id === mode.id) });
-      b.innerHTML =
-        '<span class="emoji">' + sg.emoji + "</span>" + sg.name + (mode.done[sg.id] ? '<span class="star">⭐</span>' : "");
+      const b = make("button", "toy song-btn", { type: "button", "aria-pressed": String(sg.id === mode.id), "aria-label": sg.name });
+      const em = make("span", "emoji");
+      em.textContent = sg.emoji;
+      const nm = make("span", "nm");
+      nm.textContent = sg.name;
+      b.append(em, nm);
+      if (mode.done[sg.id]) {
+        const st = make("span", "star");
+        st.textContent = "⭐";
+        b.append(st);
+      }
       b.addEventListener("click", () => pickSong(sg.id));
       songListEl.append(b);
     });
